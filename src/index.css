@@ -1,0 +1,135 @@
+/* Fontes locais (sem chamadas a servidores externos) */
+@import '@fontsource/archivo-black/latin-400.css';
+@import '@fontsource/space-grotesk/latin-400.css';
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import 'tailwindcss';
+
+/* Tokens da identidade visual (seção 8 do SDD) */
+@theme {
+  --color-fundo: #f2e8d5; /* fundo da página (bege) */
+  --color-superficie: #faf5ea; /* cartões (creme) */
+  --color-estrutura: #6b4a36; /* apoio e textos secundários (marrom) */
+  --color-tinta: #1f1a17; /* bordas e texto principal */
+  --color-destaque: #e8742a; /* destaque principal (laranja queimado) */
+  --color-destaque2: #c8553d; /* destaque secundário, uso mínimo (terracota) */
+
+  --font-titulo: 'Archivo Black', 'Arial Black', Impact, sans-serif;
+  --font-texto: 'Space Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* Sombra dura, sem desfoque: menor no celular, maior em telas grandes */
+  --shadow-dura: 4px 4px 0 0 var(--color-tinta);
+  --shadow-dura-g: 6px 6px 0 0 var(--color-tinta);
+  --shadow-dura-p: 2px 2px 0 0 var(--color-tinta);
+  --shadow-dura-m: 4px 4px 0 0 var(--color-tinta);
+}
+
+/* Tema escuro (botão no cabeçalho; o padrão é o claro).
+   Mesma paleta terrosa, em tons escuros e sem neon: o fundo vira marrom quase preto
+   e a tinta (texto, bordas e sombras) vira o bege do tema claro.
+   O laranja não muda. Contrastes conferidos: tinta sobre fundo e superfície acima de 13:1,
+   estrutura sobre superfície acima de 6:1. */
+:root[data-tema='escuro'] {
+  --color-fundo: #1c1714;
+  --color-superficie: #2a231e;
+  --color-estrutura: #c9a88a;
+  --color-tinta: #f2e8d5;
+  --color-destaque2: #d4664d;
+  color-scheme: dark;
+}
+
+/* Texto sobre laranja é sempre a tinta escura (seção 8.1 do SDD).
+   No tema escuro, a área laranja usa texto escuro e, dentro dela, tudo que usa
+   "tinta" (texto, marcas, bordas internas) volta a ser escuro. A borda e a sombra
+   da própria área continuam claras, para manter o contorno sobre o fundo escuro.
+   Cartões claros/escuros dentro do laranja (ex.: painel do acordeão) voltam ao tema escuro. */
+:root[data-tema='escuro'] .bg-destaque {
+  color: #1f1a17;
+}
+/* As variáveis são herdadas: basta aplicá-las aos filhos diretos */
+:root[data-tema='escuro'] .bg-destaque > * {
+  --color-tinta: #1f1a17;
+  --color-estrutura: #4a3324;
+}
+:root[data-tema='escuro'] .bg-destaque :is(.bg-superficie, .bg-fundo) {
+  --color-tinta: #f2e8d5;
+  --color-estrutura: #c9a88a;
+  color: var(--color-tinta);
+}
+
+@layer base {
+  html {
+    /* Espaço do cabeçalho fixo (56px) para âncoras e foco não ficarem escondidos */
+    scroll-padding-top: 72px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--color-fundo);
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  section[id] {
+    scroll-margin-top: 72px;
+  }
+
+  /* Foco sempre visível em todos os elementos interativos */
+  :focus-visible {
+    outline: 3px solid var(--color-tinta);
+    outline-offset: 3px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-titulo);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+}
+
+/* Botão COMEÇAR da abertura: visível sempre que receber foco do teclado,
+   mesmo antes do fim da animação (a animação controla opacity via style) */
+.abertura-botao:focus-within {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Seta da dica da abertura: desce e sobe devagar, para indicar que é preciso rolar */
+@media (prefers-reduced-motion: no-preference) {
+  .seta-dica {
+    display: inline-block;
+    animation: seta-dica 1.2s steps(2, jump-none) infinite;
+  }
+}
+@keyframes seta-dica {
+  from {
+    transform: translateY(-1px);
+  }
+  to {
+    transform: translateY(3px);
+  }
+}
+
+/* Todo efeito respeita prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
