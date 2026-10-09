@@ -180,7 +180,8 @@ export const textosSobre = {
           {
             pergunta: 'Encontrei um erro. O que faço?',
             resposta:
-              'Confira a fonte original, que está ao lado de cada conteúdo, e desconfie também deste site. Se o erro for nosso, conte pelo GitHub do projeto, na aba Quem faz.',
+              'Confira a fonte original, que está ao lado de cada conteúdo, e desconfie também deste site. Se o erro for nosso, conte por e-mail, pelo formulário de contato da aba Quem faz.',
+            linkContato: 'IR PARA O CONTATO',
           },
         ],
       },

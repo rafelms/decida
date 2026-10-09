@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
+import { flushSync } from 'react-dom';
 import { linksAutor, textosCabecalho, textosSobre } from '../../dados/textos';
 import { Acordeao } from '../ui/Acordeao';
 import { classesBotao } from '../ui/classesBotao';
@@ -39,6 +40,15 @@ export function PainelSobre({ ref, fechar, destino }: PainelSobreProps) {
   const irParaAba = (destino: Aba) => {
     setAba(destino);
     botoesAba.current[abas.findIndex((a) => a.id === destino)]?.focus();
+  };
+
+  // Troca para "Quem faz" e leva ao formulário de contato (usado pelo FAQ).
+  // flushSync mostra a aba antes de rolar, senão o título ainda estaria oculto.
+  const irParaContato = () => {
+    flushSync(() => setAba('quem-faz'));
+    const titulo = ref.current?.querySelector<HTMLElement>('#sobre-contato');
+    titulo?.scrollIntoView({ block: 'start' });
+    titulo?.focus({ preventScroll: true });
   };
 
   // Ao abrir num trecho (FAQ, Quem faz, Contato, Apoie), rola até o título dele e leva o foco para lá.
@@ -118,7 +128,7 @@ export function PainelSobre({ ref, fechar, destino }: PainelSobreProps) {
           hidden={aba !== 'projeto'}
           className="mt-8"
         >
-          <AbaProjeto irParaQuemFaz={() => irParaAba('quem-faz')} />
+          <AbaProjeto irParaQuemFaz={() => irParaAba('quem-faz')} irParaContato={irParaContato} />
         </div>
         <div
           role="tabpanel"
@@ -147,7 +157,7 @@ function Bloco({ titulo, idTitulo, children }: { titulo: string; idTitulo?: stri
   );
 }
 
-function AbaProjeto({ irParaQuemFaz }: { irParaQuemFaz: () => void }) {
+function AbaProjeto({ irParaQuemFaz, irParaContato }: { irParaQuemFaz: () => void; irParaContato: () => void }) {
   return (
     <div className="space-y-6">
       <Bloco titulo={textosSobre.oQueE.titulo}>
@@ -166,14 +176,21 @@ function AbaProjeto({ irParaQuemFaz }: { irParaQuemFaz: () => void }) {
       <Bloco titulo={textosSobre.semFinsLucrativos.titulo}>
         <p>{textosSobre.semFinsLucrativos.texto}</p>
       </Bloco>
-      <PerguntasFrequentes irParaQuemFaz={irParaQuemFaz} />
+      <PerguntasFrequentes irParaQuemFaz={irParaQuemFaz} irParaContato={irParaContato} />
     </div>
   );
 }
 
 // FAQ: perguntas em acordeão, agrupadas por assunto, com um convite
-// para a aba "Quem faz" no fim, para quem não achou a resposta
-function PerguntasFrequentes({ irParaQuemFaz }: { irParaQuemFaz: () => void }) {
+// para a aba "Quem faz" no fim, para quem não achou a resposta.
+// Respostas com linkContato ganham um botão que leva ao formulário de contato.
+function PerguntasFrequentes({
+  irParaQuemFaz,
+  irParaContato,
+}: {
+  irParaQuemFaz: () => void;
+  irParaContato: () => void;
+}) {
   const { faq } = textosSobre;
 
   return (
@@ -189,6 +206,11 @@ function PerguntasFrequentes({ irParaQuemFaz }: { irParaQuemFaz: () => void }) {
               {grupo.perguntas.map((item) => (
                 <Acordeao key={item.pergunta} nivelTitulo={4} titulo={item.pergunta} tituloTexto>
                   <p>{item.resposta}</p>
+                  {item.linkContato && (
+                    <button type="button" onClick={irParaContato} className={`${classesBotao('secundario')} mt-4`}>
+                      {item.linkContato}
+                    </button>
+                  )}
                 </Acordeao>
               ))}
             </div>
